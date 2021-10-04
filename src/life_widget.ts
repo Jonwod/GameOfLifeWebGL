@@ -1,4 +1,10 @@
 import {loadShader} from './gl_helpers.js';
+declare var mat4: any;
+// var mat4 = glMatrix.mat4;
+// import {mat4} from "gl-matrix";
+
+// var mat4 = glMatrix.glMatrix.mat4;
+// f.glMatrix.mat4;
 
 export class LifeWidget {
     private canvas: HTMLCanvasElement;
@@ -60,7 +66,10 @@ export class LifeWidget {
         return shaderProgram;
     }
 
-    drawScene(gl, programInfo, buffers) {
+    public draw() {
+        const gl = this.gl;
+        const programInfo = this.programInfo;
+        const buffers = this.buffers;
         gl.clearColor(0.0, 0.0, 0.0, 1.0);  // Clear to black, fully opaque
         gl.clearDepth(1.0);                 // Clear everything
         gl.enable(gl.DEPTH_TEST);           // Enable depth testing
