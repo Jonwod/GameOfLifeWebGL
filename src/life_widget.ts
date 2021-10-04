@@ -1,4 +1,5 @@
 import {loadShader} from './gl_helpers.js';
+import {LifeWorld} from './life_world.js';
 declare var mat4: any;
 // var mat4 = glMatrix.mat4;
 // import {mat4} from "gl-matrix";
@@ -11,6 +12,9 @@ export class LifeWidget {
     private gl: WebGLRenderingContext;
     private vertexShaderSource: String;
     private fragmentShaderSource: String;
+    private world: LifeWorld;
+    private cellPixels: number;
+
     private programInfo: {
         program: WebGLProgram;
         attribLocations: {
@@ -25,7 +29,7 @@ export class LifeWidget {
         position;
     }
 
-    constructor() {
+    constructor(xSize: number, ySize: number, pixelsPerCell: number) {
         this.vertexShaderSource = `
         attribute vec4 aVertexPosition;
     
@@ -42,6 +46,10 @@ export class LifeWidget {
           gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
         }
        `;
+
+       this.world = new LifeWorld(xSize, ySize);
+       this.world.randomInit(0.3);
+       this.cellPixels = pixelsPerCell;
     }
 
     initShaderProgram() {
@@ -90,6 +98,7 @@ export class LifeWidget {
         const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
         const zNear = 0.1;
         const zFar = 100.0;
+        const gridZRender = -60;
         const projectionMatrix = mat4.create();
       
         // note: glmatrix.js always has the first argument
@@ -100,16 +109,7 @@ export class LifeWidget {
                          zNear,
                          zFar);
       
-        // Set the drawing position to the "identity" point, which is
-        // the center of the scene.
-        const modelViewMatrix = mat4.create();
-      
-        // Now move the drawing position a bit to where we want to
-        // start drawing the square.
-      
-        mat4.translate(modelViewMatrix,     // destination matrix
-                       modelViewMatrix,     // matrix to translate
-                       [-0.0, 0.0, -6.0]);  // amount to translate
+
       
         // Tell WebGL how to pull out the positions from the position
         // buffer into the vertexPosition attribute.
@@ -136,21 +136,36 @@ export class LifeWidget {
       
         gl.useProgram(programInfo.program);
       
-        // Set the shader uniforms
-      
-        gl.uniformMatrix4fv(
-            programInfo.uniformLocations.projectionMatrix,
-            false,
-            projectionMatrix);
-        gl.uniformMatrix4fv(
-            programInfo.uniformLocations.modelViewMatrix,
-            false,
-            modelViewMatrix);
-      
-        {
-          const offset = 0;
-          const vertexCount = 4;
-          gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount);
+        for(let x = 0; x < this.world.getXSize(); ++x) {
+            for(let y = 0; y < this.world.getYSize(); ++y) {
+                if(this.world.getCell(x,y)) {
+                    // Set the drawing position to the "identity" point, which is
+                    // the center of the scene.
+                    const modelViewMatrix = mat4.create();
+                    const xRender = x - this.world.getXSize()/2;
+                    const yRender = y - this.world.getYSize()/2;
+                    
+                    mat4.translate(modelViewMatrix,     // destination matrix
+                                modelViewMatrix,     // matrix to translate
+                                [xRender, yRender, gridZRender]);  // amount to translate
+                    
+                    // Set the shader uniforms
+                    gl.uniformMatrix4fv(
+                        programInfo.uniformLocations.projectionMatrix,
+                        false,
+                        projectionMatrix);
+                    gl.uniformMatrix4fv(
+                        programInfo.uniformLocations.modelViewMatrix,
+                        false,
+                        modelViewMatrix);
+                
+                    {
+                        const offset = 0;
+                        const vertexCount = 4;
+                        gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount);
+                    }
+                }
+            }
         }
     }
       
@@ -191,8 +206,8 @@ export class LifeWidget {
     createHtml(): HTMLElement {
         let div = document.createElement("div");
         this.canvas = document.createElement("canvas");
-        this.canvas.width = 1000;
-        this.canvas.height = 800;
+        this.canvas.width = this.world.getXSize() * this.cellPixels;
+        this.canvas.height = this.world.getYSize() * this.cellPixels;
         this.gl = this.canvas.getContext("webgl");
         if(this.gl === null) {
             alert("Unable to initialize WebGL. Your browser or machine may not support it.");
@@ -217,6 +232,11 @@ export class LifeWidget {
 
         div.appendChild(this.canvas);
         return div;
+    }
+
+    public stepAndRedraw() {
+        this.world.step();
+        this.draw();
     }
 }
 
