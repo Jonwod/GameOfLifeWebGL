@@ -98,7 +98,7 @@ export class LifeWidget {
         const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
         const zNear = 0.1;
         const zFar = 100.0;
-        const gridZRender = -100;
+        const gridZRender = -160;
         const projectionMatrix = mat4.create();
       
         // note: glmatrix.js always has the first argument
@@ -206,8 +206,8 @@ export class LifeWidget {
     createHtml(): HTMLElement {
         let div = document.createElement("div");
         this.canvas = document.createElement("canvas");
-        this.canvas.width = this.world.getXSize() * this.cellPixels;
-        this.canvas.height = this.world.getYSize() * this.cellPixels;
+        this.canvas.width = 800;//this.world.getXSize() * this.cellPixels;
+        this.canvas.height = 800;this.world.getYSize() * this.cellPixels;
         this.gl = this.canvas.getContext("webgl");
         if(this.gl === null) {
             alert("Unable to initialize WebGL. Your browser or machine may not support it.");
