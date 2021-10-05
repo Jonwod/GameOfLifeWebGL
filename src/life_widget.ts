@@ -98,7 +98,7 @@ export class LifeWidget {
         const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
         const zNear = 0.1;
         const zFar = 100.0;
-        const gridZRender = -60;
+        const gridZRender = -100;
         const projectionMatrix = mat4.create();
       
         // note: glmatrix.js always has the first argument
@@ -183,10 +183,10 @@ export class LifeWidget {
         // Now create an array of positions for the square.
       
         const positions = [
-          -1.0,  1.0,
-           1.0,  1.0,
-          -1.0, -1.0,
-           1.0, -1.0,
+          -0.5,  0.5,
+           0.5,  0.5,
+          -0.5, -0.5,
+           0.5, -0.5,
         ];
       
         // Now pass the list of positions into WebGL to build the
