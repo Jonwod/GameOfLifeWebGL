@@ -47,7 +47,7 @@ export class LifeWidget {
         const fieldOfView = 45 * Math.PI / 180;
         const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
         const zNear = 0.1;
-        const zFar = 100.0;
+        const zFar = 1000.0;
         const gridZRender = -160;
         const projectionMatrix = mat4.create();
         mat4.perspective(projectionMatrix, fieldOfView, aspect, zNear, zFar);
@@ -99,7 +99,6 @@ export class LifeWidget {
         this.canvas = document.createElement("canvas");
         this.canvas.width = 800;
         this.canvas.height = 800;
-        this.world.getYSize() * this.cellPixels;
         this.gl = this.canvas.getContext("webgl");
         if (this.gl === null) {
             alert("Unable to initialize WebGL. Your browser or machine may not support it.");
